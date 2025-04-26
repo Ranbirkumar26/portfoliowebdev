@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise Form Analyzer</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuzzyset.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: white;
+            width: 100%;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 90%;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .exercise-selector {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .exercise-btn {
+            padding: 15px 30px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .exercise-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .exercise-btn.active {
+            background-color: #2ecc71;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: 20px 0;
+        }
+
+        #video {
+            width: 100%;
+            border-radius: 8px;
+            display: block;
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .feedback-panel {
+            width: 100%;
+            padding: 20px;
+            background-color: #f8f9f9;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .feedback-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .feedback-text {
+            font-size: 20px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .good {
+            background-color: #d5f5e3;
+            color: #27ae60;
+        }
+
+        .medium {
+            background-color: #fef9e7;
+            color: #f39c12;
+        }
+
+        .bad {
+            background-color: #fadbd8;
+            color: #e74c3c;
+        }
+
+        .score-display {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .instructions {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #eaf2f8;
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        .instructions h3 {
+            color: #2980b9;
+            margin-top: 0;
+        }
+
+        .instructions ol {
+            padding-left: 20px;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f8f9f9;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .exercise-selector {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .exercise-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Exercise Form Analyzer</h1>
+        <p>Get real-time feedback on your workout form using AI</p>
+    </header>
+
+    <div class="container">
+        <div class="exercise-selector">
+            <button class="exercise-btn" id="shoulderPressBtn">Shoulder Press</button>
+            <button class="exercise-btn" id="bicepCurlBtn">Bicep Curl</button>
+        </div>
+
+        <div class="video-container">
+            <video id="video" playsinline></video>
+            <canvas id="canvas"></canvas>
+        </div>
+
+        <div class="feedback-panel">
+            <h2 class="feedback-title">Form Feedback</h2>
+            <div id="feedbackText" class="feedback-text">Select an exercise to begin analysis</div>
+            <div id="scoreDisplay" class="score-display">Form Score: 0</div>
+        </div>
+
+        <div class="status" id="status">
+            Loading pose detection model...
+        </div>
+
+        <div class="instructions">
+            <h3>How to Use:</h3>
+            <ol>
+                <li>Select an exercise (Shoulder Press or Bicep Curl)</li>
+                <li>Allow camera access when prompted</li>
+                <li>Position yourself so your upper body is visible</li>
+                <li>Perform the exercise and get real-time feedback</li>
+                <li>Adjust your form based on the feedback to improve</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const feedbackText = document.getElementById('feedbackText');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const statusElement = document.getElementById('status');
+        const shoulderPressBtn = document.getElementById('shoulderPressBtn');
+        const bicepCurlBtn = document.getElementById('bicepCurlBtn');
+
+        // State variables
+        let detector;
+        let currentExercise = null;
+        let isModelLoaded = false;
+        let animationId;
+
+        // Initialize the application
+        async function init() {
+            try {
+                statusElement.textContent = "Loading pose detection model...";
+                
+                // Load the MoveNet model (lite version for performance)
+                const model = poseDetection.SupportedModels.MoveNet;
+                detector = await poseDetection.createDetector(model, {
+                    modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING
+                });
+                
+                statusElement.textContent = "Model loaded. Select an exercise to begin.";
+                isModelLoaded = true;
+                
+                // Set up camera
+                await setupCamera();
+                
+                // Start detection loop
+                detectPose();
+            } catch (error) {
+                console.error("Error initializing:", error);
+                statusElement.textContent = "Error loading model. Please refresh the page.";
+            }
+        }
+
+        // Set up camera access
+        async function setupCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 640, height: 480, facingMode: "user" },
+                    audio: false
+                });
+                video.srcObject = stream;
+                
+                return new Promise((resolve) => {
+                    video.onloadedmetadata = () => {
+                        video.play();
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        resolve();
+                    };
+                });
+            } catch (error) {
+                console.error("Camera error:", error);
+                statusElement.textContent = "Could not access camera. Please allow camera permissions.";
+                throw error;
+            }
+        }
+
+        // Main pose detection loop
+        async function detectPose() {
+            if (!isModelLoaded || !detector) {
+                animationId = requestAnimationFrame(detectPose);
+                return;
+            }
+
+            try {
+                const poses = await detector.estimatePoses(video);
+                
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                if (poses.length > 0 && currentExercise) {
+                    const pose = poses[0];
+                    drawKeypoints(pose.keypoints);
+                    drawSkeleton(pose.keypoints);
+                    
+                    // Analyze form based on selected exercise
+                    const { score, feedback } = analyzeForm(pose.keypoints);
+                    
+                    // Update UI with feedback
+                    updateFeedback(score, feedback);
+                }
+            } catch (error) {
+                console.error("Detection error:", error);
+            }
+            
+            animationId = requestAnimationFrame(detectPose);
+        }
+
+        // Draw keypoints on canvas
+        function drawKeypoints(keypoints) {
+            const keypointIndices = {
+                LEFT_SHOULDER: 5,
+                RIGHT_SHOULDER: 6,
+                LEFT_ELBOW: 7,
+                RIGHT_ELBOW: 8,
+                LEFT_WRIST: 9,
+                RIGHT_WRIST: 10
+            };
+
+            for (let i = 0; i < keypoints.length; i++) {
+                const keypoint = keypoints[i];
+                
+                // Only draw upper body keypoints
+                if (Object.values(keypointIndices).includes(i) && keypoint.score > 0.3) {
+                    ctx.beginPath();
+                    ctx.arc(keypoint.x, keypoint.y, 5, 0, 2 * Math.PI);
+                    ctx.fillStyle = 'aqua';
+                    ctx.fill();
+                }
+            }
+        }
+
+        // Draw skeleton on canvas
+        function drawSkeleton(keypoints) {
+            const adjacentKeyPoints = [
+                [5, 7],  // Left shoulder to left elbow
+                [7, 9],   // Left elbow to left wrist
+                [6, 8],   // Right shoulder to right elbow
+                [8, 10]   // Right elbow to right wrist
+            ];
+
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+
+            adjacentKeyPoints.forEach(([i, j]) => {
+                const kp1 = keypoints[i];
+                const kp2 = keypoints[j];
+                
+                if (kp1.score > 0.3 && kp2.score > 0.3) {
+                    ctx.beginPath();
+                    ctx.moveTo(kp1.x, kp1.y);
+                    ctx.lineTo(kp2.x, kp2.y);
+                    ctx.stroke();
+                }
+            });
+        }
+
+        // Calculate angle between three points
+        function calculateAngle(a, b, c) {
+            const ba = { x: a.x - b.x, y: a.y - b.y };
+            const bc = { x: c.x - b.x, y: c.y - b.y };
+            
+            const dotProduct = ba.x * bc.x + ba.y * bc.y;
+            const magnitudeBA = Math.sqrt(ba.x * ba.x + ba.y * ba.y);
+            const magnitudeBC = Math.sqrt(bc.x * bc.x + bc.y * bc.y);
+            
+            const cosineAngle = dotProduct / (magnitudeBA * magnitudeBC);
+            const angle = Math.acos(Math.min(Math.max(cosineAngle, -1), 1);
+            return angle * (180 / Math.PI);
+        }
+
+        // Analyze form based on selected exercise
+        function analyzeForm(keypoints) {
+            const keypointIndices = {
+                LEFT_SHOULDER: 5,
+                RIGHT_SHOULDER: 6,
+                LEFT_ELBOW: 7,
+                RIGHT_ELBOW: 8,
+                LEFT_WRIST: 9,
+                RIGHT_WRIST: 10
+            };
+
+            // Get relevant keypoints
+            const leftShoulder = keypoints[keypointIndices.LEFT_SHOULDER];
+            const rightShoulder = keypoints[keypointIndices.RIGHT_SHOULDER];
+            const leftElbow = keypoints[keypointIndices.LEFT_ELBOW];
+            const rightElbow = keypoints[keypointIndices.RIGHT_ELBOW];
+            const leftWrist = keypoints[keypointIndices.LEFT_WRIST];
+            const rightWrist = keypoints[keypointIndices.RIGHT_WRIST];
+
+            // Check visibility of arms
+            const leftArmVisible = leftWrist.score > 0.3 && leftElbow.score > 0.3 && leftShoulder.score > 0.3;
+            const rightArmVisible = rightWrist.score > 0.3 && rightElbow.score > 0.3 && rightShoulder.score > 0.3;
+
+            if (!leftArmVisible && !rightArmVisible) {
+                return { score: 0, feedback: "Arms not detected. Please position yourself in view of the camera." };
+            }
+
+            // Calculate angles
+            let leftAngle = 0, rightAngle = 0;
+            if (leftArmVisible) {
+                leftAngle = calculateAngle(leftShoulder, leftElbow, leftWrist);
+            }
+            if (rightArmVisible) {
+                rightAngle = calculateAngle(rightShoulder, rightElbow, rightWrist);
+            }
+
+            // Get average angle (only from visible arms)
+            const visibleAngles = [];
+            if (leftArmVisible) visibleAngles.push(leftAngle);
+            if (rightArmVisible) visibleAngles.push(rightAngle);
+            const avgAngle = visibleAngles.reduce((a, b) => a + b, 0) / visibleAngles.length;
+
+            // Shoulder stability (difference in shoulder y-positions)
+            const shoulderStability = 1 - Math.min(1, Math.abs(leftShoulder.y - rightShoulder.y) * 5);
+
+            // Wrist position for bicep curl
+            let wristPosition = 0;
+            if (currentExercise === "bicep_curl") {
+                // Calculate wrist position relative to shoulder (should be in front for good form)
+                let wristPosLeft = 0, wristPosRight = 0;
+                if (leftArmVisible) {
+                    wristPosLeft = leftWrist.x - leftShoulder.x;
+                }
+                if (rightArmVisible) {
+                    wristPosRight = rightWrist.x - rightShoulder.x;
+                }
+                const avgWristPos = (wristPosLeft + wristPosRight) / (leftArmVisible && rightArmVisible ? 2 : 1);
+                wristPosition = Math.min(1, Math.max(0, (avgWristPos + 0.5) / 1.5)); // Normalize to 0-1
+            }
+
+            // Apply fuzzy logic based on exercise
+            let score, feedback;
+            if (currentExercise === "shoulder_press") {
+                // Simplified fuzzy logic for shoulder press
+                if (avgAngle > 90 && shoulderStability > 0.7) {
+                    score = 85 + (shoulderStability * 15);
+                    feedback = "Good Form ✅";
+                } else if (avgAngle > 70 && shoulderStability > 0.5) {
+                    score = 60 + (avgAngle - 70) * 1.25;
+                    feedback = "Medium Form 🟡 (Lift Higher!)";
+                } else {
+                    score = Math.max(0, avgAngle * 0.7);
+                    feedback = "Bad Form ❌ (Elbows Too Low!)";
+                }
+            } else { // bicep_curl
+                // Simplified fuzzy logic for bicep curl
+                if (avgAngle > 50 && avgAngle < 100 && shoulderStability > 0.7 && wristPosition > 0.6) {
+                    score = 85 + (shoulderStability * 15);
+                    feedback = "Good Form ✅";
+                } else if ((avgAngle > 30 && avgAngle < 120) && shoulderStability > 0.5) {
+                    score = 50 + Math.min(30, Math.abs(avgAngle - 75) * 0.6);
+                    feedback = "Medium Form 🟡 (Keep elbows fixed!)";
+                } else {
+                    score = Math.max(0, 50 - Math.abs(avgAngle - 75) * 0.8);
+                    if (avgAngle < 50) {
+                        feedback = "Bad Form ❌ (Lift higher!)";
+                    } else if (avgAngle > 120) {
+                        feedback = "Bad Form ❌ (Don't swing elbows!)";
+                    } else {
+                        feedback = "Bad Form ❌ (Fix your form!)";
+                    }
+                }
+            }
+
+            // Clamp score between 0-100
+            score = Math.min(100, Math.max(0, Math.round(score)));
+
+            return { score, feedback };
+        }
+
+        // Update feedback UI
+        function updateFeedback(score, feedback) {
+            scoreDisplay.textContent = `Form Score: ${score}`;
+            feedbackText.textContent = feedback;
+            
+            // Update styling based on score
+            feedbackText.className = "feedback-text ";
+            if (score >= 70) {
+                feedbackText.classList.add("good");
+            } else if (score >= 50) {
+                feedbackText.classList.add("medium");
+            } else {
+                feedbackText.classList.add("bad");
+            }
+        }
+
+        // Exercise selection handlers
+        shoulderPressBtn.addEventListener('click', () => {
+            if (!isModelLoaded) return;
+            
+            currentExercise = "shoulder_press";
+            shoulderPressBtn.classList.add("active");
+            bicepCurlBtn.classList.remove("active");
+            
+            feedbackText.textContent = "Performing Shoulder Press - maintain good form!";
+            statusElement.textContent = "Analyzing Shoulder Press form...";
+        });
+
+        bicepCurlBtn.addEventListener('click', () => {
+            if (!isModelLoaded) return;
+            
+            currentExercise = "bicep_curl";
+            bicepCurlBtn.classList.add("active");
+            shoulderPressBtn.classList.remove("active");
+            
+            feedbackText.textContent = "Performing Bicep Curl - keep elbows stable!";
+            statusElement.textContent = "Analyzing Bicep Curl form...";
+        });
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', () => {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
+        });
+
+        // Initialize the app
+        init();
+    </script>
+</body>
+</html>

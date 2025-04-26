@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice Roller Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f7f7f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .game-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+        .players {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .player {
+            padding: 10px;
+            border-radius: 5px;
+            width: 45%;
+        }
+        .player.active {
+            background: #e6f7ff;
+            border: 1px solid #1890ff;
+        }
+        .dice {
+            font-size: 50px;
+            margin: 20px 0;
+        }
+        button {
+            background: #1890ff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #096dd9;
+        }
+        button:disabled {
+            background: #d9d9d9;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎲 Dice Roller</h1>
+        <div class="players">
+            <div class="player" id="player1">
+                <h2>Player 1</h2>
+                <p>Score: <span id="score1">0</span></p>
+                <p>Current: <span id="current1">0</span></p>
+            </div>
+            <div class="player" id="player2">
+                <h2>Player 2</h2>
+                <p>Score: <span id="score2">0</span></p>
+                <p>Current: <span id="current2">0</span></p>
+            </div>
+        </div>
+        <div class="dice" id="dice">🎲</div>
+        <button id="roll">Roll Dice</button>
+        <button id="hold">Hold</button>
+        <button id="reset">Reset Game</button>
+    </div>
+
+    <script>
+        const rollBtn = document.getElementById('roll');
+        const holdBtn = document.getElementById('hold');
+        const resetBtn = document.getElementById('reset');
+        const diceEl = document.getElementById('dice');
+        const players = [
+            { scoreEl: document.getElementById('score1'), currentEl: document.getElementById('current1'), playerEl: document.getElementById('player1') },
+            { scoreEl: document.getElementById('score2'), currentEl: document.getElementById('current2'), playerEl: document.getElementById('player2') }
+        ];
+
+        let scores = [0, 0];
+        let currentScore = 0;
+        let activePlayer = 0;
+        let gameActive = true;
+
+        // Switch player
+        const switchPlayer = () => {
+            currentScore = 0;
+            players[activePlayer].currentEl.textContent = currentScore;
+            activePlayer = activePlayer === 0 ? 1 : 0;
+            players.forEach((player, i) => {
+                player.playerEl.classList.toggle('active', i === activePlayer);
+            });
+        };
+
+        // Roll dice
+        rollBtn.addEventListener('click', () => {
+            if (!gameActive) return;
+            
+            const dice = Math.floor(Math.random() * 6) + 1;
+            diceEl.textContent = getDiceFace(dice);
+
+            if (dice !== 1) {
+                currentScore += dice;
+                players[activePlayer].currentEl.textContent = currentScore;
+            } else {
+                switchPlayer();
+            }
+        });
+
+        // Hold score
+        holdBtn.addEventListener('click', () => {
+            if (!gameActive || currentScore === 0) return;
+            
+            scores[activePlayer] += currentScore;
+            players[activePlayer].scoreEl.textContent = scores[activePlayer];
+
+            if (scores[activePlayer] >= 100) {
+                gameActive = false;
+                players[activePlayer].playerEl.style.backgroundColor = '#a7ffa7';
+                diceEl.textContent = '🎉';
+                rollBtn.disabled = true;
+                holdBtn.disabled = true;
+            } else {
+                switchPlayer();
+            }
+        });
+
+        // Reset game
+        resetBtn.addEventListener('click', () => {
+            scores = [0, 0];
+            currentScore = 0;
+            activePlayer = 0;
+            gameActive = true;
+
+            players.forEach((player, i) => {
+                player.scoreEl.textContent = '0';
+                player.currentEl.textContent = '0';
+                player.playerEl.style.backgroundColor = '';
+                player.playerEl.classList.toggle('active', i === 0);
+            });
+
+            diceEl.textContent = '🎲';
+            rollBtn.disabled = false;
+            holdBtn.disabled = false;
+        });
+
+        // Helper: Get dice emoji
+        function getDiceFace(num) {
+            const diceFaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+            return diceFaces[num - 1];
+        }
+
+        // Initialize
+        players[0].playerEl.classList.add('active');
+    </script>
+</body>
+</html>

@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranbir's Portfolio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --text-color: #333;
+            --bg-color: #f9f9f9;
+            --card-bg: #fff;
+            --border-color: #ddd;
+            --header-bg: #fff;
+            --progress-bg: #ecf0f1;
+            --book-bg: rgba(255, 255, 255, 0.9);
+        }
+
+        .dark-mode {
+            --primary-color: #2980b9;
+            --secondary-color: #27ae60;
+            --text-color: #f0f0f0;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --border-color: #444;
+            --header-bg: #1a1a1a;
+            --progress-bg: #2c3e50;
+            --book-bg: rgba(30, 30, 30, 0.9);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            scroll-behavior: smooth;
+        }
+
+        header {
+            background-color: var(--header-bg);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+
+        .dropdown-btn:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--card-bg);
+            min-width: 160px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .dropdown-content a {
+            color: var(--text-color);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-content a:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        
+
+        .mode-toggle {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--text-color);
+            cursor: pointer;
+            margin-left: 1rem;
+        }
+
+        
+
+        .hero {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 2rem;
+            text-align: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .hero-btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .cv-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: 2px solid var(--primary-color);
+        }
+
+        .contribute-btn {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .hero-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .cv-btn:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+
+        .contribute-btn:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+
+        @media (max-width: 480px) {
+            .hero-buttons {
+                flex-direction: column;
+                gap: 1rem;
+                width: 100%;
+            }
+            
+            .hero-btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+        
+        .hero-slideshow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .hero-slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .hero-slide.active {
+            opacity: 0.3; /* Adjust opacity as needed */
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent background */
+            padding: 2rem;
+            border-radius: 10px;
+            max-width: 800px;
+        }
+        
+        .dark-mode .hero-content {
+            background-color: rgba(30, 30, 30, 0.7); /* Dark mode version */
+        }
+
+        .profile-img {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary-color);
+        }
+
+        .about-section {
+            position: relative;
+            padding: 3rem 2rem;
+            max-width: 1200px;
+            margin: 2rem auto;
+        }
+
+        .book-bg {
+        
+        background-image: url('./book.png');
+        background-size: cover;
+        background-position: center;
+        padding: 2rem;
+        border-radius: 8px;
+        position: relative;
+        z-index: 1;
+        min-height: 300px; 
+    }
+
+        .book-bg::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--book-bg);
+        z-index: -1;
+        border-radius: 8px;
+    }
+
+        .about-section h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        .about-content {
+            line-height: 1.8;
+        }
+
+        .achievements {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .achievements h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        .achievements-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .achievements-table th, .achievements-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .achievements-table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .achievements-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .achievements-table tr:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .dark-mode .achievements-table tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .video-border {
+            border: 5px solid white; 
+            border-radius: 10px; 
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5); 
+            display: block;
+            margin: 20px auto; 
+        }
+
+        .slideshow-section {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .slideshow-section h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        .slideshow-container {
+            position: relative;
+            max-width: 1000px;
+            margin: auto;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .slide {
+            display: none;
+            position: relative;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+        }
+
+        .slide-text {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 1.5rem;
+        }
+
+        .slide-text h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .prev, .next {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            width: auto;
+            padding: 1rem;
+            margin-top: -22px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+            transition: 0.3s;
+            background-color: rgba(0, 0, 0, 0.3);
+            border: none;
+            user-select: none;
+        }
+
+        .next {
+            right: 0;
+            border-radius: 3px 0 0 3px;
+        }
+
+        .prev {
+            left: 0;
+            border-radius: 0 3px 3px 0;
+        }
+
+        .prev:hover, .next:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .dots {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .dot {
+            cursor: pointer;
+            height: 15px;
+            width: 15px;
+            margin: 0 5px;
+            background-color: var(--border-color);
+            border-radius: 50%;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+
+        .dot.active, .dot:hover {
+            background-color: var(--primary-color);
+        }
+
+        .skills-section {
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(52, 152, 219, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(46, 204, 113, 0.1) 0%, transparent 20%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect x="45" width="10" height="10" fill="%233498db" opacity="0.3"/><rect y="45" width="10" height="10" fill="%232ecc71" opacity="0.3"/></svg>');
+            padding: 3rem 2rem;
+            border-radius: 12px;
+            margin: 3rem auto;
+            max-width: 1200px;
+            border: 1px solid var(--border-color);
+        }
+
+        .dark-mode .skills-section {
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(41, 128, 185, 0.2) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(39, 174, 96, 0.2) 0%, transparent 20%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect x="45" width="10" height="10" fill="%232980b9" opacity="0.5"/><rect y="45" width="10" height="10" fill="%2327ae60" opacity="0.5"/></svg>');
+        }
+
+        .skills-section h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        .progress-container {
+            
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 columns */
+            gap: 20px; /* Space between cards */
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .progress-item {
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .progress-title {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background-color: var(--border-color);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            border-radius: 5px;
+            transition: width 1s ease-in-out;
+        }
+
+        /* Projects Section Styling */
+        .projects-section {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            color: #333;
+        }
+
+        
+
+        .projects-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            width: 100%;
+            position: relative;
+        }
+
+        .project-card {
+            display: flex;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .project-image-container {
+            flex: 0 0 40%;
+            max-width: 30%;
+            overflow: hidden;
+        }
+
+        .project-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .project-card:hover .project-img {
+            transform: scale(1.05);
+        }
+
+        .project-content {
+            flex: 1;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            color: #121212;
+        }
+
+        .project-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        .project-features {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .project-features li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.75rem;
+            line-height: 1.5;
+        }
+
+        .project-features li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .project-card {
+                flex-direction: column;
+            }
+
+            .project-image-container {
+                flex: 1 1 100%;
+                max-width: 100%;
+                height: 200px;
+            }
+
+            .project-content {
+                padding: 1rem;
+            }
+        }
+
+
+
+        .contact-section {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 3rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            background: 
+                linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(46, 204, 113, 0.1) 100%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" preserveAspectRatio="none"><path d="M0,0 C50,50 150,-50 200,0 L200,100 C150,150 50,50 0,100 Z" fill="%233498db" opacity="0.05"/></svg>');
+            background-size: cover;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .contact-section::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, var(--primary-color) 0%, transparent 70%);
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .dark-mode .contact-form {
+            background-color: rgba(30, 30, 30, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .contact-form:hover {
+            transform: translateY(-5px);
+        }
+        
+
+        .contact-section h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .submit-btn:hover {
+            background-color: #2980b9;
+        }
+
+        footer {
+            background-color: var(--header-bg);
+            padding: 2rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .social-icon {
+            color: var(--text-color);
+            font-size: 1.5rem;
+            transition: color 0.3s, transform 0.3s;
+        }
+
+        .social-icon:hover {
+            color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                width: 100%;
+                justify-content: space-between;
+                flex-wrap: wrap;
+            }
+
+            .search-container {
+                width: 100%;
+                margin-top: 1rem;
+            }
+
+            .search-input {
+                flex-grow: 1;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .tagline {
+                font-size: 1.2rem;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .slide img {
+                height: 300px;
+            }
+        }
+
+        .datetime-display {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-color);
+            margin-left: auto; /* Pushes it to the right */
+            padding: 0 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .datetime-display {
+                margin-left: 0;
+                width: 100%;
+                justify-content: center;
+                margin-top: 1rem;
+            }
+        }
+
+        .cv-btn i {
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="nav-container">
+            <div class="logo">Ranbir's Portfolio</div>
+            <div class="nav-links">
+                
+                <div class="datetime-display" style="border: 2px solid black; border-radius: 8px; padding: 10px 15px; display: inline-block; font-family: Arial, sans-serif; background-color: var(--bg-color)">
+                    <span id="current-date" style="font-weight: bold; margin-right: 10px;"></span>
+                    <span id="current-time" style="font-weight: bold; margin-right: 10px;"></span>
+                    <span id="current-day" style="font-style: italic;"></span>
+                </div>
+
+                <div class="dropdown">
+                    <button class="dropdown-btn">Menu <i class="fas fa-caret-down"></i></button>
+                    <div class="dropdown-content">
+                        <a href="#about">About</a>
+                        <a href="#achievements">Achievements</a>
+                        <a href="#projects">Projects</a>
+                        <a href="#skills">Skills</a>
+                        <a href="#contact">Contact</a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <div class="dropdown">
+                        <button class="dropdown-btn">Projects <i class="fas fa-caret-down"></i></button>
+                        <div class="dropdown-content">
+                            <!-- First Section - Robotics Projects -->
+                            <div style="padding: 8px 16px; font-weight: bold; border-bottom: 1px solid var(--border-color);">
+                                <a href="#projects">Robotics Projects</a>
+                            </div>
+                            
+                            
+                            <!-- Second Section - Personal Projects -->
+                            <div style="padding: 8px 16px; font-weight: bold; border-bottom: 1px solid var(--border-color); margin-top: 8px;">
+                                Personal Projects
+                            </div>
+                            <a href="Array 11.html">ARRAY 11</a>
+                            <a href="pose.html">SAATHI</a>
+                            <a href="todo.html">TO-DO List</a>
+                            <a href="dice.html">Dice Game</a>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                
+                <button class="mode-toggle" id="modeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-slideshow">
+            <div class="hero-slide active" style="background-image: url('./agriculture.jpg')"></div>
+            <div class="hero-slide" style="background-image: url('./cricket.webp')"></div>
+            <div class="hero-slide" style="background-image: url('./gym.jpg')"></div>
+            <div class="hero-slide" style="background-image: url('./AI\ .jpg')"></div>
+            
+        </div>
+        
+        <div class="hero-content">
+            <img src="./passport pic(24-25).png" alt="Profile Image" class="profile-img">
+            <h1>Ranbir Kumar</h1>
+            <p class="tagline">I am a <span id="typing-text"></span></p>
+        </div>
+
+        <div class="hero-buttons">
+            <a href="./Ranbir_Kumar_-_Robotics_Engineer.pdf" class="hero-btn cv-btn" download="Ranbir_Kumar_CV.pdf">
+                <i class="fas fa-file-pdf"></i> Download CV
+            </a>
+            
+            <a href="./payment.png" class="hero-btn contribute-btn">Contribute</a>
+        </div>
+
+    </section>
+
+    <section class="about-section" id="about">
+        <div class="book-bg">
+            <h2>About Me</h2>
+            <div class="about-content">
+                <p>I am a highly driven and multi-talented individual, excelling in both academics and athletics. As a student at VIT Chennai, my passion for robotics has led me to participate in prestigious competitions like the International Rover Challenge (IRC) 2024 and Robocon 2025, where I have showcased my technical expertise and problem-solving skills.</p>
+                <p>My dedication to innovation extends to AI, as I am currently developing a system to correct body posture during gym exercises. Beyond academics, I am a formidable athlete, having been the highest wicket-taker in Gautam Buddh Nagar in 2018 and earning the Man of the Match title in the Sairam Sports Meet 2023.</p>
+                <p>I have also displayed exceptional versatility in sports, winning a district-level gold medal in karate, excelling in badminton at the district level, and securing first place in calisthenics. With a blend of intellect, discipline, and athleticism, I continue to push boundaries and inspire others in both the technological and sporting arenas.</p>
+            </div>
+        </div>
+    </section>
+
+    <br>
+
+    <section class="achievements" id="achievements">
+        <h2>My Achievements</h2>
+        <table class="achievements-table">
+            <thead>
+                <tr>
+                    <th>Achievement</th>
+                    <th>Details</th>
+                    <th>Year</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>District-Level Gold Medalist - Karate</td>
+                    <td>Won gold at the district level</td>
+                    <td>2016</td>
+                </tr>
+                <tr>
+                    <td>Hackathon - Mathematics Club</td>
+                    <td>3rd prize - 1500 Cash prize</td>
+                    <td>2018</td>
+                </tr>
+
+                <tr>
+                    <td>District-Level Badminton Player</td>
+                    <td>Competed at the district level</td>
+                    <td>2021</td>
+                </tr>
+                
+                <tr>
+                    <td>Man of the Match - Sairam Sports Meet</td>
+                    <td>Awarded in cricket match; team reached semifinals</td>
+                    <td>2023</td>
+                </tr>
+                <tr>
+                    <td>Highest Wicket-Taker - Gautam Buddh Nagar</td>
+                    <td>Lead in wickets at the district level</td>
+                    <td>2023</td>
+                </tr>
+                <tr>
+                    <td>1st Prize - Calisthenics Basic Level</td>
+                    <td>Won in a calisthenics competition</td>
+                    <td>2024</td>
+                </tr>
+                <tr>
+                    <td>International Rover Challenge (IRC) 2024</td>
+                    <td>Developing a mobile science lab rover for soil analysis and habitability research</td>
+                    <td>2024</td>
+                </tr>
+                <tr>
+                    <td>Smart India Hackathon (SIH) 2024</td>
+                    <td>Ranked Top 5 in Round 1</td>
+                    <td>2024</td>
+                </tr>
+                <tr>
+                    <td>Robotic Arm Development</td>
+                    <td>Designed a 6-DOF robotic arm with advanced gear mechanisms</td>
+                    <td>2024-2025</td>
+                </tr>
+                <tr>
+                    <td>AI Gym Posture Correction</td>
+                    <td>Created an AI project for real-time posture correction during exercises</td>
+                    <td>2025</td>
+                </tr>
+                <tr>
+                    <td>Robocon 2025</td>
+                    <td>Scored 100/100 in Level 1 (Highest in India)</td>
+                    <td>2025</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="about-section" id="about">
+        <h1>Watch My Work in Action</h1>
+            <video class="video-border" width="85%" controls>
+                <source src="./videoplayback.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+    </section>
+
+    <section class="slideshow-section" id="projects">
+        <h2>My Projects</h2>
+        <div class="slideshow-container">
+            <div class="slide active">
+                <a href="https://roverchallenge.org/irc-2024/" target="_blank">
+                    <img src="./NASA_Mars_Rover.jpg" alt="Rover">
+                </a>
+                <div class="slide-text">
+                    <h3>Mars Rover</h3>
+                    <p>A robotic explorer designed for planetary exploration equipped with modules to test soil samples and draw meaningful conclusions.</p>
+                </div>
+            </div>
+            <div class="slide">
+                <a href="https://home.iitd.ac.in/show.php?id=243&in_sections=Press" target="_blank">
+                    <img src="./download.jpg" alt="Robocon">
+                </a>
+                <div class="slide-text">
+                    <h3>Robocon 2024 BOT</h3>
+                    <p>A bot that in co-ordination with another bot plays basketball, with each one being assigned a task, i.e. shooting and dunking.</p>
+                </div>
+            </div>
+            <div class="slide">
+                <a href="https://www.farmroboticschallenge.ai/" target="_blank">
+                    <img src="./download-1.jpg" alt="Agribot">
+                </a>
+                <div class="slide-text">
+                    <h3>Agribot</h3>
+                    <p>A vehicle designed for proving aid to the agriculture industry by helping in ploughing as well planting of seeds.</p>
+                </div>
+            </div>
+            <a class="prev" onclick="changeSlide(-1)">&#10094;</a>
+            <a class="next" onclick="changeSlide(1)">&#10095;</a>
+        </div>
+        <div class="dots">
+            <span class="dot active" onclick="currentSlide(1)"></span>
+            <span class="dot" onclick="currentSlide(2)"></span>
+            <span class="dot" onclick="currentSlide(3)"></span>
+        </div>
+
+        <br><br><br><br><br>
+
+        
+        <section class="projects-section">
+            <h1 style="text-align: center;">MY PERSONAL PROJECTS</h1><br><br>
+            <div class="projects-container">
+                <!-- Project 1 - ARRAY 11 -->
+                <a href="Array 11.html" class="project-card">
+                    <div class="project-image-container">
+                        <img src="./array_game.png" alt="ARRAY 11 Game Interface" class="project-img">
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">ARRAY 11</h3>
+                        <ul class="project-features">
+                            <li>Start & Move – Begin at the top-left cell (0,0) and select an operation (Add, Subtract, Multiply, or Divide)</li>
+                            <li>Perform Operations – Click on another cell to move there and apply the chosen operation</li>
+                            <li>Win or Lose – Reach the target number in 11 moves or fewer to win</li>
+                        </ul>
+                    </div>
+                </a>
+        
+                <!-- Project 2 - SAATHI -->
+                <a href="pose.html" class="project-card">
+                    <div class="project-image-container">
+                        <img src="./arm.png" alt="SAATHI Fitness Assistant" class="project-img">
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">SAATHI</h3>
+                        <ul class="project-features">
+                            <li>Performs live while exercising</li>
+                            <li>Corrects posture and rates your form</li>
+                            <li>Tracks your fitness journey with ease</li>
+                        </ul>
+                    </div>
+                </a>
+        
+                <!-- Project 3 - To-Do List -->
+                <a href="todo.html" class="project-card">
+                    <div class="project-image-container">
+                        <img src="./todo_list.png" alt="To-Do List Application" class="project-img">
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">To-Do List</h3>
+                        <ul class="project-features">
+                            <li>Helps users organize tasks by adding, completing, and deleting items</li>
+                            <li>Includes task input, checkboxes for completion, and delete buttons</li>
+                            <li>Used for daily productivity, reminders, and tracking progress</li>
+                        </ul>
+                    </div>
+                </a>
+        
+                <!-- Project 4 - Dice Game -->
+                <a href="dice.html" class="project-card">
+                    <div class="project-image-container">
+                        <img src="./dicegame.png" alt="Dice Game Interface" class="project-img">
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">Dice Game</h3>
+                        <ul class="project-features">
+                            <li>Roll dice to match a target number or achieve the highest score</li>
+                            <li>Players take turns rolling dice with random outcomes</li>
+                            <li>First to reach a set score or highest roll wins</li>
+                        </ul>
+                    </div>
+                </a>
+            </div>
+        </section>
+        
+
+    <br>
+
+    <section class="skills-section" id="skills">
+        <h2>My Skills</h2>
+        <div class="progress-container">
+            <div class="progress-item">
+                <div class="progress-title">
+                    <span>Robotics Engineering</span>
+                    <span>75%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 75%"></div>
+                </div>
+            </div>
+            <div class="progress-item">
+                <div class="progress-title">
+                    <span>AI Development</span>
+                    <span>60%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 60%"></div>
+                </div>
+            </div>
+            <div class="progress-item">
+                <div class="progress-title">
+                    <span>Mechanical Design</span>
+                    <span>65%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 65%"></div>
+                </div>
+            </div>
+            <div class="progress-item">
+                <div class="progress-title">
+                    <span>Web Development</span>
+                    <span>70%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 70%"></div>
+                </div>
+            </div>
+            <div class="progress-item">
+                <div class="progress-title">
+                    <span>Sports Performance</span>
+                    <span>85%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 85%"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <br><br><br>
+
+    <section class="contact-section" id="contact">
+        <h2>Contact Me</h2>
+        <form class="contact-form" action="https://script.google.com/macros/s/AKfycbzTO8voW-tkpqUxijaJUKFB6DSb6TuzGuDFStmC4HaMgZ5021x2JP5Mi989fhfBbNlEOA/exec" method="POST">
+            
+            <input type="text" name="_honey" style="display: none;">
+            
+           
+            <input type="hidden" name="_captcha" value="false">
+            
+            
+            <input type="hidden" name="_next" value="https://rk2605portfolio.netlify.app/">
+            
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="subject">Subject</label>
+                <input type="text" id="subject" name="subject" required>
+            </div>
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" required></textarea>
+            </div>
+            <button type="submit" class="submit-btn">Send Message</button>
+        </form>
+    </section>
+
+    <footer>
+        <div class="social-icons">
+            <a href="https://www.youtube.com/@maxleggyftw5343" class="social-icon" target="_blank"><i class="fab fa-youtube"></i></a>
+            <a href="https://www.instagram.com/ranbir.k_2605/" class="social-icon" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.linkedin.com/feed/?trk=guest_homepage-basic_google-one-tap-submit" class="social-icon" target="_blank"><i class="fab fa-linkedin"></i></a>
+            <a href="https://github.com/dashboard" class="social-icon" target="_blank"><i class="fab fa-github"></i></a>
+        </div>
+        <p class="copyright">&copy; 2025 Ranbir's Portfolio. All rights reserved.</p>
+    </footer>
+
+    <script>
+
+        // Date and Time Display
+        function updateDateTime() {
+            const now = new Date();
+            
+            // Format date (e.g., "June 15, 2023")
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('current-date').textContent = now.toLocaleDateString(undefined, options);
+            
+            // Format time (e.g., "14:30")
+            document.getElementById('current-time').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute:'2-digit' });
+            
+            // Format day (e.g., "Wednesday")
+            document.getElementById('current-day').textContent = now.toLocaleDateString(undefined, { weekday: 'long' });
+        }
+
+        // Update immediately and then every minute
+        updateDateTime();
+        setInterval(updateDateTime, 60000);
+        let heroSlideIndex = 0;
+        const heroSlides = document.querySelectorAll('.hero-slide');
+        
+        function showHeroSlide(n) {
+            // Reset all slides
+            heroSlides.forEach(slide => {
+                slide.classList.remove('active');
+            });
+            
+            // Calculate new index with wrapping
+            heroSlideIndex = (n + heroSlides.length) % heroSlides.length;
+            
+            // Show new slide
+            heroSlides[heroSlideIndex].classList.add('active');
+        }
+        
+        function nextHeroSlide() {
+            showHeroSlide(heroSlideIndex + 1);
+        }
+        
+        // Change slide every 5 seconds
+        setInterval(nextHeroSlide, 5000);
+        
+        // Initialize slideshow
+        showHeroSlide(0);
+
+        // Dark/Light mode toggle
+        const modeToggle = document.getElementById('modeToggle');
+        const body = document.body;
+        const icon = modeToggle.querySelector('i');
+
+        // Check for saved user preference or use system preference
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        const currentTheme = localStorage.getItem('theme');
+
+        if (currentTheme === 'dark' || (!currentTheme && prefersDarkScheme.matches)) {
+            body.classList.add('dark-mode');
+            icon.classList.replace('fa-moon', 'fa-sun');
+        }
+
+        modeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                icon.classList.replace('fa-moon', 'fa-sun');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                icon.classList.replace('fa-sun', 'fa-moon');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Typing animation
+        const typingText = document.getElementById('typing-text');
+        const professions = ['Robotics Engineer', 'AI Developer', 'Athlete', 'Innovator'];
+        let professionIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        let typingSpeed = 100;
+
+        function type() {
+            const currentProfession = professions[professionIndex];
+            
+            if (isDeleting) {
+                typingText.textContent = currentProfession.substring(0, charIndex - 1);
+                charIndex--;
+                typingSpeed = 50;
+            } else {
+                typingText.textContent = currentProfession.substring(0, charIndex + 1);
+                charIndex++;
+                typingSpeed = 100;
+            }
+
+            if (!isDeleting && charIndex === currentProfession.length) {
+                isDeleting = true;
+                typingSpeed = 1500; // Pause at end
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                professionIndex = (professionIndex + 1) % professions.length;
+                typingSpeed = 500; // Pause before typing next
+            }
+
+            setTimeout(type, typingSpeed);
+        }
+
+        // Start typing animation
+        setTimeout(type, 1000);
+
+        // Slideshow functionality
+        let slideIndex = 1;
+        showSlides(slideIndex);
+
+        function changeSlide(n) {
+            showSlides(slideIndex += n);
+        }
+
+        function currentSlide(n) {
+            showSlides(slideIndex = n);
+        }
+
+        function showSlides(n) {
+            const slides = document.getElementsByClassName('slide');
+            const dots = document.getElementsByClassName('dot');
+            
+            if (n > slides.length) { slideIndex = 1; }
+            if (n < 1) { slideIndex = slides.length; }
+            
+            for (let i = 0; i < slides.length; i++) {
+                slides[i].classList.remove('active');
+            }
+            
+            for (let i = 0; i < dots.length; i++) {
+                dots[i].classList.remove('active');
+            }
+            
+            slides[slideIndex - 1].classList.add('active');
+            dots[slideIndex - 1].classList.add('active');
+        }
+
+        // Auto slide change every 5 seconds
+        setInterval(() => {
+            changeSlide(1);
+        }, 5000);
+
+        // Simple search functionality
+        const searchInput = document.querySelector('.search-input');
+        const searchBtn = document.querySelector('.search-btn');
+
+        searchBtn.addEventListener('click', () => {
+            alert(`Searching for: ${searchInput.value}`);
+            // In a real implementation, you would search your content here
+        });
+
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                alert(`Searching for: ${searchInput.value}`);
+                // In a real implementation, you would search your content here
+            }
+        });
+
+        // Contact form submission
+        const contactForm = document.querySelector('.contact-form');
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Thank you for your message! I will get back to you soon.');
+            contactForm.reset();
+        });
+    </script>
+</body>
+</html>
